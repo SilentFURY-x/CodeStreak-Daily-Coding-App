@@ -1,4 +1,4 @@
-package com.fury.codestreak.ui.theme
+package com.fury.codestreak.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

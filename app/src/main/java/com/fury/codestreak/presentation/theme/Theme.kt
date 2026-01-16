@@ -1,6 +1,5 @@
-package com.fury.codestreak.ui.theme
+package com.fury.codestreak.presentation.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
