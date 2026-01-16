@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
@@ -14,7 +15,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fury.codestreak.presentation.theme.PrimaryBlue
-import com.fury.codestreak.presentation.theme.PrimaryBlueDark
 import com.fury.codestreak.presentation.theme.SurfaceDark
 import com.fury.codestreak.presentation.theme.SurfaceHighlight
 import com.fury.codestreak.presentation.theme.TextGray
@@ -43,9 +42,9 @@ fun AuthScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // 1. The Header Icon (Using a placeholder for now, or a Code icon)
+        // 1. The Header Icon
         Icon(
-            imageVector = Icons.Default.Lock, // Placeholder for the Logo
+            imageVector = Icons.Default.Code, // Changed to Code icon for relevance, or keep Lock
             contentDescription = "Logo",
             tint = PrimaryBlue,
             modifier = Modifier.size(48.dp)
@@ -112,22 +111,48 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 5. Main Action Button with Gradient feel
-        Button(
-            onClick = { viewModel.onEvent(AuthEvent.Submit) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = PrimaryBlue
-            ),
-            shape = RoundedCornerShape(12.dp)
-        ) {
+        // --- NEW: Error Handling & Loading State ---
+
+        // Show Error if it exists
+        if (state.error != null) {
             Text(
-                text = if (state.isLoginMode) "Sign In" else "Create Account",
-                style = MaterialTheme.typography.labelLarge,
-                fontSize = 16.sp
+                text = state.error,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp)
             )
+        }
+
+        // 5. Main Action Button OR Loading Spinner
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = PrimaryBlue)
+            }
+        } else {
+            Button(
+                onClick = { viewModel.onEvent(AuthEvent.Submit) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = PrimaryBlue
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = if (state.isLoginMode) "Sign In" else "Create Account",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 16.sp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

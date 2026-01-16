@@ -3,16 +3,19 @@ package com.fury.codestreak.presentation.auth
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.fury.codestreak.domain.repository.AuthRepository
+import com.fury.codestreak.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor() : ViewModel() {
+class AuthViewModel @Inject constructor(
+    private val repository: AuthRepository // <--- Injected!
+) : ViewModel() {
 
-    // The private state that only this ViewModel can change
     private val _state = mutableStateOf(AuthState())
-
-    // The public state that the UI can read
     val state: State<AuthState> = _state
 
     fun onEvent(event: AuthEvent) {
@@ -24,17 +27,52 @@ class AuthViewModel @Inject constructor() : ViewModel() {
                 _state.value = _state.value.copy(password = event.password)
             }
             is AuthEvent.ToggleMode -> {
-                _state.value = _state.value.copy(isLoginMode = !state.value.isLoginMode)
+                _state.value = _state.value.copy(
+                    isLoginMode = !state.value.isLoginMode,
+                    error = null // Clear errors when switching
+                )
             }
             is AuthEvent.Submit -> {
-                // We will add Firebase logic here later
-                _state.value = _state.value.copy(isLoading = true)
+                authenticate()
+            }
+        }
+    }
+
+    private fun authenticate() {
+        val email = state.value.email
+        val password = state.value.password
+
+        if (email.isBlank() || password.isBlank()) {
+            _state.value = _state.value.copy(error = "Please fill in all fields")
+            return
+        }
+
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, error = null)
+
+            val result = if (state.value.isLoginMode) {
+                repository.login(email, password)
+            } else {
+                repository.signup(email, password)
+            }
+
+            // Handle the result
+            _state.value = when (result) {
+                is Resource.Success -> {
+                    // TODO: Navigation to Home Screen will happen here
+                    _state.value.copy(isLoading = false, error = "Success! Logged in.")
+                }
+                is Resource.Error -> {
+                    _state.value.copy(isLoading = false, error = result.message)
+                }
+                is Resource.Loading -> {
+                    _state.value.copy(isLoading = true)
+                }
             }
         }
     }
 }
 
-// Simple events to send from UI to ViewModel
 sealed class AuthEvent {
     data class EmailChanged(val email: String): AuthEvent()
     data class PasswordChanged(val password: String): AuthEvent()
