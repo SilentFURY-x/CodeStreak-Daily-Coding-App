@@ -24,4 +24,26 @@ object AppModule {
     fun provideAuthRepository(firebaseAuth: FirebaseAuth): AuthRepository {
         return AuthRepositoryImpl(firebaseAuth)
     }
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(app: android.app.Application): com.fury.codestreak.data.local.AppDatabase {
+        return androidx.room.Room.databaseBuilder(
+            app,
+            com.fury.codestreak.data.local.AppDatabase::class.java,
+            "codestreak_db"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuestionDao(db: com.fury.codestreak.data.local.AppDatabase): com.fury.codestreak.data.local.QuestionDao {
+        return db.questionDao
+    }
+
+    @Provides
+    @Singleton
+    fun provideQuestionRepository(dao: com.fury.codestreak.data.local.QuestionDao): com.fury.codestreak.domain.repository.QuestionRepository {
+        return com.fury.codestreak.data.repository.QuestionRepositoryImpl(dao)
+    }
 }
