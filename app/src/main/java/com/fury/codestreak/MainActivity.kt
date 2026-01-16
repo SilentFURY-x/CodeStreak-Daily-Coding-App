@@ -38,7 +38,8 @@ class MainActivity : ComponentActivity() {
                         }
                         "home" -> {
                             com.fury.codestreak.presentation.home.HomeScreen(
-                                onNavigateToWorkspace = { currentScreen = "workspace" }
+                                onNavigateToWorkspace = { currentScreen = "workspace" },
+                                onNavigateToProfile = { currentScreen = "profile" }
                             )
                         }
                         "workspace" -> {
@@ -52,6 +53,12 @@ class MainActivity : ComponentActivity() {
                             com.fury.codestreak.presentation.solution.SolutionScreen(
                                 onBack = { currentScreen = "workspace" }, // Go back to code
                                 onContinue = { currentScreen = "home" }   // Loop finished!
+                            )
+                        }
+
+                        "profile" -> {
+                            com.fury.codestreak.presentation.profile.ProfileScreen(
+                                onLogout = { currentScreen = "auth" }
                             )
                         }
                     }

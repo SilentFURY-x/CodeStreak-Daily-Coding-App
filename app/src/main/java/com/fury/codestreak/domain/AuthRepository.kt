@@ -6,5 +6,8 @@ import com.fury.codestreak.util.Resource
 interface AuthRepository {
     suspend fun login(email: String, password: String): Resource<FirebaseUser>
     suspend fun signup(email: String, password: String): Resource<FirebaseUser>
+    // New methods
+    suspend fun signInWithGoogle(idToken: String): Resource<FirebaseUser>
+    suspend fun signInWithGithub(activity: android.app.Activity): Resource<FirebaseUser>
     fun getCurrentUser(): FirebaseUser?
 }

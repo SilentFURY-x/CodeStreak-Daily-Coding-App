@@ -46,4 +46,14 @@ object AppModule {
     fun provideQuestionRepository(dao: com.fury.codestreak.data.local.QuestionDao): com.fury.codestreak.domain.repository.QuestionRepository {
         return com.fury.codestreak.data.repository.QuestionRepositoryImpl(dao)
     }
+
+    @Provides
+    @Singleton
+    fun provideCodeforcesApi(): com.fury.codestreak.data.remote.CodeforcesApi {
+        return retrofit2.Retrofit.Builder()
+            .baseUrl("https://codeforces.com/api/")
+            .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+            .build()
+            .create(com.fury.codestreak.data.remote.CodeforcesApi::class.java)
+    }
 }

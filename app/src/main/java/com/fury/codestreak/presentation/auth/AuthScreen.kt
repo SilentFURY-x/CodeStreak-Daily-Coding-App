@@ -28,12 +28,37 @@ import com.fury.codestreak.presentation.theme.SurfaceDark
 import com.fury.codestreak.presentation.theme.SurfaceHighlight
 import com.fury.codestreak.presentation.theme.TextGray
 import com.fury.codestreak.presentation.theme.TextWhite
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun AuthScreen(
-    viewModel: AuthViewModel = hiltViewModel() // Hilt injects the ViewModel here automatically
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
+    val context = LocalContext.current // <--- Needed for GitHub Login
+
+    // 1. Configure Google Sign In Launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            account?.idToken?.let { token ->
+                // Send the token to ViewModel to authenticate with Firebase
+                viewModel.onEvent(AuthEvent.SignInWithGoogle(token))
+            }
+        } catch (e: ApiException) {
+            // Handle error (e.g., user cancelled) or log it
+            // e.printStackTrace()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -42,9 +67,11 @@ fun AuthScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // ... (Your existing UI code remains exactly the same) ...
+
         // 1. The Header Icon
         Icon(
-            imageVector = Icons.Default.Code, // Changed to Code icon for relevance, or keep Lock
+            imageVector = Icons.Default.Code,
             contentDescription = "Logo",
             tint = PrimaryBlue,
             modifier = Modifier.size(48.dp)
@@ -68,20 +95,18 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 3. The Toggle Switch (Login / Sign Up)
+        // 3. The Toggle Switch
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(SurfaceDark, RoundedCornerShape(12.dp))
                 .padding(4.dp)
         ) {
-            // Login Tab
             AuthTab(
                 text = "Login",
                 isSelected = state.isLoginMode,
                 onClick = { if (!state.isLoginMode) viewModel.onEvent(AuthEvent.ToggleMode) }
             )
-            // Sign Up Tab
             AuthTab(
                 text = "Sign Up",
                 isSelected = !state.isLoginMode,
@@ -111,8 +136,6 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- NEW: Error Handling & Loading State ---
-
         // Show Error if it exists
         if (state.error != null) {
             Text(
@@ -126,7 +149,7 @@ fun AuthScreen(
             )
         }
 
-        // 5. Main Action Button OR Loading Spinner
+        // 5. Main Action Button
         if (state.isLoading) {
             Box(
                 modifier = Modifier
@@ -171,10 +194,24 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 7. Social Buttons (Google & GitHub)
+        // 7. Social Buttons (UPDATED LOGIC HERE)
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SocialButton(text = "Google") { /* TODO: Implement Google Auth */ }
-            SocialButton(text = "GitHub") { /* TODO: Implement GitHub Auth */ }
+
+            // Google Button
+            SocialButton(text = "Google") {
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken("Ov23liW5i3G0bwoxOlTv") // <--- PASTE YOUR ID HERE
+                    .requestEmail()
+                    .build()
+                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                googleSignInLauncher.launch(googleSignInClient.signInIntent)
+            }
+
+            // GitHub Button
+            SocialButton(text = "GitHub") {
+                // We pass the Activity Context to the ViewModel/Repository
+                viewModel.onEvent(AuthEvent.SignInWithGithub(context as Activity))
+            }
         }
     }
 }

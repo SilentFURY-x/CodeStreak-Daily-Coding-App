@@ -35,6 +35,29 @@ class AuthViewModel @Inject constructor(
             is AuthEvent.Submit -> {
                 authenticate()
             }
+
+            is AuthEvent.SignInWithGoogle -> {
+                viewModelScope.launch {
+                    _state.value = _state.value.copy(isLoading = true)
+                    val result = repository.signInWithGoogle(event.idToken)
+                    handleAuthResult(result)
+                }
+            }
+            is AuthEvent.SignInWithGithub -> {
+                viewModelScope.launch {
+                    _state.value = _state.value.copy(isLoading = true)
+                    val result = repository.signInWithGithub(event.activity)
+                    handleAuthResult(result)
+                }
+            }
+        }
+    }
+
+    private fun handleAuthResult(result: Resource<com.google.firebase.auth.FirebaseUser>) {
+        _state.value = when (result) {
+            is Resource.Success -> _state.value.copy(isLoading = false, error = null) // Navigation happens in UI
+            is Resource.Error -> _state.value.copy(isLoading = false, error = result.message)
+            is Resource.Loading -> _state.value.copy(isLoading = true)
         }
     }
 
@@ -78,4 +101,6 @@ sealed class AuthEvent {
     data class PasswordChanged(val password: String): AuthEvent()
     object ToggleMode: AuthEvent()
     object Submit: AuthEvent()
+    data class SignInWithGoogle(val idToken: String) : AuthEvent()
+    data class SignInWithGithub(val activity: android.app.Activity) : AuthEvent()
 }

@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.fury.codestreak" />
+                  <option name="mobileSdkAppId" value="1:383269530727:android:20d1ebdfe8e43cfbc378c2" />
+                  <option name="projectId" value="codestreak-fury" />
+                  <option name="projectNumber" value="383269530727" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

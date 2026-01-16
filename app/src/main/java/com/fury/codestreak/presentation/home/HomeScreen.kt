@@ -1,6 +1,7 @@
 package com.fury.codestreak.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,7 +25,8 @@ import com.fury.codestreak.presentation.theme.*
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
-    onNavigateToWorkspace: () -> Unit // Callback to go to coding screen
+    onNavigateToWorkspace: () -> Unit, // Callback to go to coding screen
+    onNavigateToProfile: () -> Unit
 ) {
     val state = viewModel.state.value
 
@@ -34,7 +36,7 @@ fun HomeScreen(
             .padding(20.dp)
     ) {
         // 1. Top Bar
-        HomeTopBar()
+        HomeTopBar(onProfileClick = onNavigateToProfile)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -75,7 +77,7 @@ fun HomeScreen(
 // --- COMPONENTS ---
 
 @Composable
-fun HomeTopBar() {
+fun HomeTopBar(onProfileClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -87,7 +89,8 @@ fun HomeTopBar() {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(SurfaceHighlight),
+                    .background(SurfaceHighlight)
+                    .clickable { onProfileClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = TextGray)
