@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.fury.codestreak.presentation.theme.BackgroundDark
 import com.fury.codestreak.presentation.theme.CodeStreakTheme
 import dagger.hilt.android.AndroidEntryPoint
+import com.fury.codestreak.presentation.auth.AuthScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -27,7 +28,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = BackgroundDark
                 ) {
-                    // We will add our Navigation here in the next step
+                    AuthScreen()
                 }
             }
         }
