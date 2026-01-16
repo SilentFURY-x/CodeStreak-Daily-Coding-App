@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383269530727",
+    "project_id": "codestreak-fury",
+    "storage_bucket": "codestreak-fury.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383269530727:android:20d1ebdfe8e43cfbc378c2",
+        "android_client_info": {
+          "package_name": "com.fury.codestreak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBv0eR78NSojamRN_feq8UgqXBLxcgB3Nw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
