@@ -43,7 +43,15 @@ class MainActivity : ComponentActivity() {
                         }
                         "workspace" -> {
                             com.fury.codestreak.presentation.workspace.WorkspaceScreen(
-                                onBack = { currentScreen = "home" }
+                                onBack = { currentScreen = "home" },
+                                // NEW: Navigate to Solution on Submit
+                                onSubmitSuccess = { currentScreen = "solution" }
+                            )
+                        }
+                        "solution" -> {
+                            com.fury.codestreak.presentation.solution.SolutionScreen(
+                                onBack = { currentScreen = "workspace" }, // Go back to code
+                                onContinue = { currentScreen = "home" }   // Loop finished!
                             )
                         }
                     }

@@ -30,7 +30,8 @@ import com.fury.codestreak.presentation.theme.*
 @Composable
 fun WorkspaceScreen(
     viewModel: WorkspaceViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSubmitSuccess: () -> Unit
 ) {
     val state = viewModel.state.value
     val question = state.question ?: return
@@ -103,7 +104,10 @@ fun WorkspaceScreen(
 
             // 4. Submit Button
             Button(
-                onClick = { viewModel.onSubmit() },
+                onClick = {
+                    viewModel.onSubmit()
+                    onSubmitSuccess() // <--- Call this when clicked
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
