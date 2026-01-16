@@ -29,19 +29,23 @@ class MainActivity : ComponentActivity() {
             CodeStreakTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = BackgroundDark) {
 
-                    // Simple Navigation for Testing
-                    var currentScreen by remember { mutableStateOf("home") }
+                    // Simple State-based Navigation
+                    var currentScreen by remember { mutableStateOf("home") } // Start at Home for now
 
-                    if (currentScreen == "auth") {
-                        // Pass a lambda to switch screens on success
-                        com.fury.codestreak.presentation.auth.AuthScreen()
-                        // NOTE: In a real app, we observe the ViewModel event.
-                        // For now, to SEE the dashboard, change "auth" to "home" in the line above:
-                        // var currentScreen by remember { mutableStateOf("home") }
-                    } else {
-                        com.fury.codestreak.presentation.home.HomeScreen(
-                            onNavigateToWorkspace = { /* Navigate to workspace */ }
-                        )
+                    when (currentScreen) {
+                        "auth" -> {
+                            com.fury.codestreak.presentation.auth.AuthScreen()
+                        }
+                        "home" -> {
+                            com.fury.codestreak.presentation.home.HomeScreen(
+                                onNavigateToWorkspace = { currentScreen = "workspace" }
+                            )
+                        }
+                        "workspace" -> {
+                            com.fury.codestreak.presentation.workspace.WorkspaceScreen(
+                                onBack = { currentScreen = "home" }
+                            )
+                        }
                     }
                 }
             }
