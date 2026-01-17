@@ -43,8 +43,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideQuestionRepository(dao: com.fury.codestreak.data.local.QuestionDao): com.fury.codestreak.domain.repository.QuestionRepository {
-        return com.fury.codestreak.data.repository.QuestionRepositoryImpl(dao)
+    fun provideQuestionRepository(
+        dao: com.fury.codestreak.data.local.QuestionDao,
+        firestore: com.google.firebase.firestore.FirebaseFirestore // <--- 1. Add this argument
+    ): com.fury.codestreak.domain.repository.QuestionRepository {
+        // 2. Pass it to the constructor
+        return com.fury.codestreak.data.repository.QuestionRepositoryImpl(dao, firestore)
     }
 
     @Provides
@@ -55,5 +59,11 @@ object AppModule {
             .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
             .build()
             .create(com.fury.codestreak.data.remote.CodeforcesApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): com.google.firebase.firestore.FirebaseFirestore {
+        return com.google.firebase.firestore.FirebaseFirestore.getInstance()
     }
 }

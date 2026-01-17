@@ -38,10 +38,21 @@ import com.google.android.gms.common.api.ApiException
 
 @Composable
 fun AuthScreen(
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
+    onLoginSuccess: () -> Unit
 ) {
     val state = viewModel.state.value
     val context = LocalContext.current // <--- Needed for GitHub Login
+
+    LaunchedEffect(key1 = true) {
+        viewModel.uiEvent.collect { event ->
+            when(event) {
+                is AuthUiEvent.NavigateToHome -> {
+                    onLoginSuccess() // <--- Trigger navigation
+                }
+            }
+        }
+    }
 
     // 1. Configure Google Sign In Launcher
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -200,7 +211,7 @@ fun AuthScreen(
             // Google Button
             SocialButton(text = "Google") {
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestIdToken("Ov23liW5i3G0bwoxOlTv") // <--- PASTE YOUR ID HERE
+                    .requestIdToken("383269530727-noam9kdth1edltvgvmku5qgh1lrd3ba1.apps.googleusercontent.com") // <--- PASTE YOUR ID HERE
                     .requestEmail()
                     .build()
                 val googleSignInClient = GoogleSignIn.getClient(context, gso)

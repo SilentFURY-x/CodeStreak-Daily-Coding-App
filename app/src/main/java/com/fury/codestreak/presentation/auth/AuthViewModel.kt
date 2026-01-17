@@ -7,16 +7,22 @@ import androidx.lifecycle.viewModelScope
 import com.fury.codestreak.domain.repository.AuthRepository
 import com.fury.codestreak.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository // <--- Injected!
+    private val repository: AuthRepository
 ) : ViewModel() {
 
     private val _state = mutableStateOf(AuthState())
     val state: State<AuthState> = _state
+
+    // 1. Create a Channel for "One-time" UI Events (like Navigation)
+    private val _uiEvent = Channel<AuthUiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
 
     fun onEvent(event: AuthEvent) {
         when(event) {
@@ -29,13 +35,12 @@ class AuthViewModel @Inject constructor(
             is AuthEvent.ToggleMode -> {
                 _state.value = _state.value.copy(
                     isLoginMode = !state.value.isLoginMode,
-                    error = null // Clear errors when switching
+                    error = null
                 )
             }
             is AuthEvent.Submit -> {
                 authenticate()
             }
-
             is AuthEvent.SignInWithGoogle -> {
                 viewModelScope.launch {
                     _state.value = _state.value.copy(isLoading = true)
@@ -53,14 +58,6 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    private fun handleAuthResult(result: Resource<com.google.firebase.auth.FirebaseUser>) {
-        _state.value = when (result) {
-            is Resource.Success -> _state.value.copy(isLoading = false, error = null) // Navigation happens in UI
-            is Resource.Error -> _state.value.copy(isLoading = false, error = result.message)
-            is Resource.Loading -> _state.value.copy(isLoading = true)
-        }
-    }
-
     private fun authenticate() {
         val email = state.value.email
         val password = state.value.password
@@ -72,30 +69,33 @@ class AuthViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-
             val result = if (state.value.isLoginMode) {
                 repository.login(email, password)
             } else {
                 repository.signup(email, password)
             }
+            handleAuthResult(result)
+        }
+    }
 
-            // Handle the result
-            _state.value = when (result) {
-                is Resource.Success -> {
-                    // TODO: Navigation to Home Screen will happen here
-                    _state.value.copy(isLoading = false, error = "Success! Logged in.")
-                }
-                is Resource.Error -> {
-                    _state.value.copy(isLoading = false, error = result.message)
-                }
-                is Resource.Loading -> {
-                    _state.value.copy(isLoading = true)
-                }
+    private suspend fun handleAuthResult(result: Resource<com.google.firebase.auth.FirebaseUser>) {
+        when (result) {
+            is Resource.Success -> {
+                _state.value = _state.value.copy(isLoading = false, error = null)
+                // 2. Send the Success Signal!
+                _uiEvent.send(AuthUiEvent.NavigateToHome)
+            }
+            is Resource.Error -> {
+                _state.value = _state.value.copy(isLoading = false, error = result.message)
+            }
+            is Resource.Loading -> {
+                _state.value = _state.value.copy(isLoading = true)
             }
         }
     }
 }
 
+// Events sent from UI to ViewModel
 sealed class AuthEvent {
     data class EmailChanged(val email: String): AuthEvent()
     data class PasswordChanged(val password: String): AuthEvent()
@@ -103,4 +103,9 @@ sealed class AuthEvent {
     object Submit: AuthEvent()
     data class SignInWithGoogle(val idToken: String) : AuthEvent()
     data class SignInWithGithub(val activity: android.app.Activity) : AuthEvent()
+}
+
+// New: Events sent from ViewModel to UI
+sealed class AuthUiEvent {
+    object NavigateToHome : AuthUiEvent()
 }

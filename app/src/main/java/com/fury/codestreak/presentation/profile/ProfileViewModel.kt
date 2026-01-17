@@ -1,5 +1,6 @@
 package com.fury.codestreak.presentation.profile
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -17,7 +18,7 @@ data class ProfileState(
     val codeforcesRank: String? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
-    val isDialogVisible: Boolean = false // To type the handle
+    val isDialogVisible: Boolean = false
 )
 
 @HiltViewModel
@@ -30,7 +31,6 @@ class ProfileViewModel @Inject constructor(
     val state: State<ProfileState> = _state
 
     init {
-        // 1. Get current Firebase User
         val user = authRepository.getCurrentUser()
         if (user != null) {
             _state.value = _state.value.copy(email = user.email ?: "User")
@@ -39,22 +39,11 @@ class ProfileViewModel @Inject constructor(
 
     fun onEvent(event: ProfileEvent) {
         when(event) {
-            is ProfileEvent.ShowDialog -> {
-                _state.value = _state.value.copy(isDialogVisible = true)
-            }
-            is ProfileEvent.HideDialog -> {
-                _state.value = _state.value.copy(isDialogVisible = false)
-            }
-            is ProfileEvent.UpdateHandle -> {
-                _state.value = _state.value.copy(codeforcesHandle = event.handle)
-            }
-            is ProfileEvent.FetchStats -> {
-                fetchCodeforcesStats()
-            }
-            is ProfileEvent.Logout -> {
-                // In a real app, call authRepository.logout()
-                // For now, we just clear local state
-            }
+            is ProfileEvent.ShowDialog -> _state.value = _state.value.copy(isDialogVisible = true)
+            is ProfileEvent.HideDialog -> _state.value = _state.value.copy(isDialogVisible = false)
+            is ProfileEvent.UpdateHandle -> _state.value = _state.value.copy(codeforcesHandle = event.handle)
+            is ProfileEvent.FetchStats -> fetchCodeforcesStats()
+            is ProfileEvent.Logout -> authRepository.getCurrentUser() // Placeholder
         }
     }
 
@@ -63,22 +52,25 @@ class ProfileViewModel @Inject constructor(
         if (handle.isBlank()) return
 
         viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, isDialogVisible = false)
+            _state.value = _state.value.copy(isLoading = true, isDialogVisible = false, error = null)
             try {
+                Log.d("ProfileVM", "Fetching for: $handle")
                 val response = api.getUserInfo(handle)
+                Log.d("ProfileVM", "Response: $response")
+
                 if (response.status == "OK" && !response.result.isNullOrEmpty()) {
                     val user = response.result[0]
                     _state.value = _state.value.copy(
                         isLoading = false,
                         codeforcesRating = user.rating,
-                        codeforcesRank = user.rank,
-                        error = null
+                        codeforcesRank = user.rank
                     )
                 } else {
                     _state.value = _state.value.copy(isLoading = false, error = "User not found")
                 }
             } catch (e: Exception) {
-                _state.value = _state.value.copy(isLoading = false, error = "Network Error")
+                Log.e("ProfileVM", "Error", e)
+                _state.value = _state.value.copy(isLoading = false, error = "Network Error: ${e.message}")
             }
         }
     }
