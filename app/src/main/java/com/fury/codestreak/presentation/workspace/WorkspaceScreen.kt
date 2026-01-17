@@ -105,8 +105,12 @@ fun WorkspaceScreen(
             // 4. Submit Button
             Button(
                 onClick = {
-                    viewModel.onSubmit()
-                    onSubmitSuccess() // <--- Call this when clicked
+                    val isValid = viewModel.onSubmit()
+                    if (isValid) {
+                        onSubmitSuccess() // Navigate ONLY if valid
+                    } else {
+                        // Optional: Show a Snackbar or Toast here saying "Please attempt the problem!"
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()

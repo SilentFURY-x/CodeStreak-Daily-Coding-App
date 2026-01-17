@@ -19,11 +19,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.fury.codestreak.presentation.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SolutionScreen(
+    viewModel: SolutionViewModel = hiltViewModel(), // Injected VM
     onBack: () -> Unit,
     onContinue: () -> Unit
 ) {
@@ -62,18 +64,9 @@ fun SolutionScreen(
             Text("Official Solution", style = MaterialTheme.typography.titleMedium, color = TextWhite)
             Spacer(modifier = Modifier.height(12.dp))
 
+            // --- CHANGED: Now using the Real Solution from ViewModel ---
             SolutionCodeBlock(
-                code = """
-def find_two_sum(nums, target):
-    prevMap = {} # val : index
-    
-    for i, n in enumerate(nums):
-        diff = target - n
-        if diff in prevMap:
-            return [prevMap[diff], i]
-        prevMap[n] = i
-    return []
-                """.trimIndent()
+                code = viewModel.solutionCode.value
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -91,7 +84,7 @@ def find_two_sum(nums, target):
             Spacer(modifier = Modifier.height(12.dp))
 
             TakeawayCard(
-                icon = Icons.Default.Memory, // Memory icon placeholder
+                icon = Icons.Default.Memory,
                 title = "Space-Time Trade-off",
                 description = "We use extra memory O(n) to store the dictionary to achieve faster execution time."
             )
@@ -149,6 +142,8 @@ fun SuccessBanner() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF5722), modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
+                // Note: This Streak text is still static for now.
+                // We will hook this up to real user data in the final "Streak" step.
                 Text("DAILY STREAK: 13 DAYS", style = MaterialTheme.typography.labelSmall, color = TextGray)
             }
         }
@@ -161,7 +156,7 @@ fun SolutionCodeBlock(code: String) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0D1117)) // Darker editor background
+            .background(Color(0xFF0D1117))
             .padding(16.dp)
     ) {
         Text(

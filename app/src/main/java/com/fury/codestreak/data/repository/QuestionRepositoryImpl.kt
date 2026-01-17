@@ -17,12 +17,11 @@ class QuestionRepositoryImpl @Inject constructor(
 
     override suspend fun getDailyQuestion(): Resource<Question> {
         return try {
-            // 1. Fetch ALL questions from Firestore "questions" collection
+            // 1. Fetch ALL questions from Firestore
             val snapshot = firestore.collection("questions").get().await()
 
             if (!snapshot.isEmpty) {
-                // 2. The Pool Strategy: Pick one based on the Day of the Year
-                // If you have 5 questions, and it's day 6, it wraps around to question 1.
+                // 2. The Pool Strategy
                 val allDocs = snapshot.documents
                 val dayOfYear = LocalDate.now().toEpochDay()
                 val dailyIndex = (dayOfYear % allDocs.size).toInt()
@@ -36,7 +35,10 @@ class QuestionRepositoryImpl @Inject constructor(
                     topic = targetDoc.getString("topic") ?: "General",
                     timeEstimate = targetDoc.getString("timeEstimate") ?: "15 mins",
                     date = System.currentTimeMillis(),
-                    isSolved = false
+                    isSolved = false,
+                    // --- NEW FIELDS ADDED HERE ---
+                    starterCode = targetDoc.getString("starterCode") ?: "// Write your solution here...",
+                    solutionCode = targetDoc.getString("solutionCode") ?: "// Solution not available yet"
                 )
 
                 // 3. Cache it locally
@@ -46,7 +48,7 @@ class QuestionRepositoryImpl @Inject constructor(
                 fetchLocal()
             }
         } catch (e: Exception) {
-            fetchLocal() // Fallback to offline if internet fails
+            fetchLocal() // Fallback to offline
         }
     }
 
@@ -78,7 +80,11 @@ class QuestionRepositoryImpl @Inject constructor(
                 difficulty = "Easy",
                 topic = "Strings",
                 timeEstimate = "15 mins",
-                date = System.currentTimeMillis()
+                date = System.currentTimeMillis(),
+                isSolved = false,
+                // --- NEW DUMMY DATA ADDED HERE ---
+                starterCode = "fun isPalindrome(s: String): Boolean {\n    // Your code here\n}",
+                solutionCode = "fun isPalindrome(s: String): Boolean {\n    return s == s.reversed()\n}"
             )
         )
         dao.insertQuestions(dummyQuestions)

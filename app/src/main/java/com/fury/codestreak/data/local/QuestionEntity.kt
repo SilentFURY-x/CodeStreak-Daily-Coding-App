@@ -13,9 +13,11 @@ data class QuestionEntity(
     val topic: String,
     val timeEstimate: String,
     val isSolved: Boolean = false,
-    val date: Long // Timestamp for "Daily" logic
+    val date: Long,
+    // NEW FIELDS
+    val starterCode: String,
+    val solutionCode: String
 ) {
-    // Helper function to convert Database Object -> Domain Object
     fun toDomain(): Question {
         return Question(
             id = id,
@@ -25,12 +27,13 @@ data class QuestionEntity(
             topic = topic,
             timeEstimate = timeEstimate,
             isSolved = isSolved,
-            date = date
+            date = date,
+            starterCode = starterCode,
+            solutionCode = solutionCode
         )
     }
 }
 
-// Helper to convert Domain Object -> Database Object
 fun Question.toEntity(): QuestionEntity {
     return QuestionEntity(
         id = id,
@@ -40,6 +43,8 @@ fun Question.toEntity(): QuestionEntity {
         topic = topic,
         timeEstimate = timeEstimate,
         isSolved = isSolved,
-        date = date
+        date = date,
+        starterCode = starterCode,
+        solutionCode = solutionCode
     )
 }
