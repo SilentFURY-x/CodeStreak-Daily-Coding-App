@@ -27,20 +27,18 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
 
-            // This now calls our smart Repo (Firestore -> Room)
             when (val result = repository.getDailyQuestion()) {
                 is Resource.Success -> {
                     _state.value = _state.value.copy(
                         dailyQuestion = result.data,
                         isLoading = false,
-                        // If it's solved, we could calculate streak here
                         streak = if (result.data?.isSolved == true) 1 else 0
                     )
                 }
                 is Resource.Error -> {
                     _state.value = _state.value.copy(
                         isLoading = false
-                        // Keep dummy data in UI if error, or show snackbar
+                        // Error handling is silent for now (falls back to cached data in repo)
                     )
                 }
                 is Resource.Loading -> {}
