@@ -65,8 +65,13 @@ fun SolutionScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundDark),
                 actions = {
-                    IconButton(onClick = { /* Bookmark logic later */ }) {
-                        Icon(Icons.Default.BookmarkBorder, contentDescription = "Save", tint = TextWhite)
+                    IconButton(onClick = { viewModel.onBookmarkClick() }) {
+                        Icon(
+                            // Toggle Icon based on state: Filled vs Border
+                            if (viewModel.isBookmarked.value) Icons.Filled.Bookmark else Icons.Default.BookmarkBorder,
+                            contentDescription = "Save",
+                            tint = if (viewModel.isBookmarked.value) PrimaryBlue else TextWhite
+                        )
                     }
                 }
             )

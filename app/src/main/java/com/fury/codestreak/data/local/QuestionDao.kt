@@ -15,6 +15,9 @@ interface QuestionDao {
     @Query("SELECT * FROM questions")
     suspend fun getAllQuestions(): List<QuestionEntity>
 
+    @Query("SELECT * FROM questions WHERE isBookmarked = 1")
+    suspend fun getBookmarkedQuestions(): List<QuestionEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertQuestions(questions: List<QuestionEntity>)
 

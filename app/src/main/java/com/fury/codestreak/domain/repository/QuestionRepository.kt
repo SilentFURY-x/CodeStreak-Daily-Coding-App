@@ -6,4 +6,6 @@ import com.fury.codestreak.util.Resource
 interface QuestionRepository {
     suspend fun getDailyQuestion(): Resource<Question>
     suspend fun markQuestionSolved(id: String, userCode: String)
+    suspend fun toggleBookmark(id: String)
+    suspend fun getSavedQuestions(): List<Question>
 }

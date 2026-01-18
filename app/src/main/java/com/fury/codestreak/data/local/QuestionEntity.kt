@@ -17,7 +17,8 @@ data class QuestionEntity(
     // NEW FIELDS
     val starterCode: String,
     val solutionCode: String,
-    val userCode: String? = null
+    val userCode: String? = null,
+    val isBookmarked: Boolean = false
 ) {
     fun toDomain(): Question {
         return Question(
@@ -31,7 +32,8 @@ data class QuestionEntity(
             date = date,
             starterCode = starterCode,
             solutionCode = solutionCode,
-            userCode = userCode
+            userCode = userCode,
+            isBookmarked = isBookmarked
         )
     }
 }
@@ -48,6 +50,7 @@ fun Question.toEntity(): QuestionEntity {
         date = date,
         starterCode = starterCode,
         solutionCode = solutionCode,
-        userCode = userCode
+        userCode = userCode,
+        isBookmarked = isBookmarked
     )
 }
