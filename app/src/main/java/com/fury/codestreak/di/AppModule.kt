@@ -66,4 +66,10 @@ object AppModule {
     fun provideFirestore(): com.google.firebase.firestore.FirebaseFirestore {
         return com.google.firebase.firestore.FirebaseFirestore.getInstance()
     }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(firestore: com.google.firebase.firestore.FirebaseFirestore): com.fury.codestreak.domain.repository.UserRepository {
+        return com.fury.codestreak.data.repository.UserRepositoryImpl(firestore)
+    }
 }

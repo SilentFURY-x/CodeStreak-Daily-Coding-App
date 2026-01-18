@@ -14,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val repository: AuthRepository,
+    private val userRepository: com.fury.codestreak.domain.repository.UserRepository
 ) : ViewModel() {
 
     private val _state = mutableStateOf(AuthState())
@@ -82,6 +83,14 @@ class AuthViewModel @Inject constructor(
         when (result) {
             is Resource.Success -> {
                 _state.value = _state.value.copy(isLoading = false, error = null)
+
+                result.data?.let { firebaseUser ->
+                    val user = com.fury.codestreak.domain.model.User(
+                        uid = firebaseUser.uid,
+                        email = firebaseUser.email ?: ""
+                    )
+                    userRepository.createOrUpdateUser(user)
+                }
                 // 2. Send the Success Signal!
                 _uiEvent.send(AuthUiEvent.NavigateToHome)
             }
