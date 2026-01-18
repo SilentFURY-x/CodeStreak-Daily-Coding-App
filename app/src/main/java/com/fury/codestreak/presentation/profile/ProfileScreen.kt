@@ -1,13 +1,13 @@
 package com.fury.codestreak.presentation.profile
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -27,7 +27,8 @@ import com.fury.codestreak.presentation.theme.*
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogout: () -> Unit // <--- Added Logout Callback
 ) {
     val state = viewModel.state.value
 
@@ -42,8 +43,9 @@ fun ProfileScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = BackgroundDark),
                 actions = {
-                    IconButton(onClick = { /* Settings */ }) {
-                        Icon(Icons.Default.Settings, contentDescription = null, tint = TextGray)
+                    // LOGOUT BUTTON
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Logout", tint = ErrorRed)
                     }
                 }
             )
@@ -60,7 +62,6 @@ fun ProfileScreen(
 
             // 1. User Header
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Avatar (Simple Gradient for now, could be Image)
                 Box(
                     modifier = Modifier
                         .size(80.dp)
@@ -90,7 +91,7 @@ fun ProfileScreen(
                         color = TextWhite
                     )
                     Text(
-                        text = "Level ${(state.user?.score ?: 0) / 50}", // XP Level Calculation
+                        text = "Level ${(state.user?.score ?: 0) / 50}",
                         style = MaterialTheme.typography.titleMedium,
                         color = PrimaryBlue
                     )
@@ -126,7 +127,15 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // 3. Codeforces Section
+            // 3. ACTIVITY HEATMAP (The "Wow" Factor)
+            Text("Activity Map", style = MaterialTheme.typography.titleMedium, color = TextWhite)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ActivityHeatmap(streak = state.user?.currentStreak ?: 0)
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // 4. Codeforces Section
             Text("Competitive Coding", style = MaterialTheme.typography.titleMedium, color = TextWhite)
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -144,7 +153,6 @@ fun ProfileScreen(
                     modifier = Modifier.padding(20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Codeforces Icon/Logo
                     Box(
                         modifier = Modifier
                             .size(48.dp)
@@ -152,7 +160,6 @@ fun ProfileScreen(
                             .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Simple Text Logo replacement
                         Text("CF", color = Color(0xFF1F8AC0), fontWeight = FontWeight.Bold, fontSize = 20.sp)
                     }
 
@@ -164,7 +171,7 @@ fun ProfileScreen(
                                 text = state.user?.codeforcesHandle ?: "Unknown",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = getRankColor(state.cfRank) // Dynamic Color!
+                                color = getRankColor(state.cfRank)
                             )
                             Text(
                                 text = "${state.cfRank?.replaceFirstChar { it.uppercase() }} • ${state.cfRating ?: "Unrated"}",
@@ -182,15 +189,10 @@ fun ProfileScreen(
                     }
                 }
             }
-
-            if (state.isLoading) {
-                Spacer(modifier = Modifier.height(16.dp))
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = PrimaryBlue)
-            }
         }
     }
 
-    // 4. Input Dialog (Reused & Polished)
+    // Input Dialog (Keep exactly the same as before)
     if (state.isDialogVisible) {
         AlertDialog(
             onDismissRequest = { viewModel.onEvent(ProfileEvent.HideDialog) },
@@ -212,9 +214,6 @@ fun ProfileScreen(
                             unfocusedBorderColor = SurfaceHighlight
                         )
                     )
-                    if (state.error != null) {
-                        Text(state.error, color = ErrorRed, fontSize = 12.sp, modifier = Modifier.padding(top = 4.dp))
-                    }
                 }
             },
             confirmButton = {
@@ -234,26 +233,60 @@ fun ProfileScreen(
     }
 }
 
-// --- HELPER COMPOSABLES ---
-
+// --- HEATMAP COMPONENT ---
 @Composable
-fun DashboardCard(
-    modifier: Modifier = Modifier,
-    title: String,
-    value: String,
-    icon: ImageVector,
-    color: Color
-) {
+fun ActivityHeatmap(streak: Int) {
+    // We visualize 12 weeks (columns) x 7 days (rows) = 84 blocks
+    // We "light up" the last N blocks based on the streak
+    val totalBlocks = 84
+    val activeBlocks = streak.coerceAtMost(totalBlocks)
+
+    Card(
+        colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceHighlight),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                repeat(12) { col ->
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        repeat(7) { row ->
+                            // Calculate if this specific block should be active
+                            // Logic: The heatmap fills from Right-Bottom to Left-Top
+                            val blockIndex = (col * 7) + row
+                            // Reverse logic to fill from end
+                            val isActive = blockIndex >= (totalBlocks - activeBlocks)
+
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(
+                                        if (isActive) SuccessGreen.copy(alpha = 0.8f)
+                                        else SurfaceHighlight.copy(alpha = 0.5f)
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text("Last 12 Weeks", style = MaterialTheme.typography.labelSmall, color = TextGray)
+        }
+    }
+}
+
+// ... Keep DashboardCard and getRankColor helpers exactly as they were ...
+@Composable
+fun DashboardCard(modifier: Modifier = Modifier, title: String, value: String, icon: ImageVector, color: Color) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
         border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceHighlight)
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
             Spacer(modifier = Modifier.height(8.dp))
             Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = TextWhite)
@@ -262,16 +295,15 @@ fun DashboardCard(
     }
 }
 
-// Codeforces Standard Colors
 fun getRankColor(rank: String?): Color {
     return when (rank?.lowercase()) {
-        "newbie" -> Color(0xFF808080) // Grey
-        "pupil" -> Color(0xFF008000) // Green
-        "specialist" -> Color(0xFF03A89E) // Cyan
-        "expert" -> Color(0xFF0000FF) // Blue
-        "candidate master" -> Color(0xFFAA00AA) // Violet
-        "master", "international master" -> Color(0xFFFF8C00) // Orange
-        "grandmaster", "international grandmaster", "legendary grandmaster" -> Color(0xFFFF0000) // Red
+        "newbie" -> Color(0xFF808080)
+        "pupil" -> Color(0xFF008000)
+        "specialist" -> Color(0xFF03A89E)
+        "expert" -> Color(0xFF0000FF)
+        "candidate master" -> Color(0xFFAA00AA)
+        "master", "international master" -> Color(0xFFFF8C00)
+        "grandmaster", "international grandmaster", "legendary grandmaster" -> Color(0xFFFF0000)
         else -> TextWhite
     }
 }

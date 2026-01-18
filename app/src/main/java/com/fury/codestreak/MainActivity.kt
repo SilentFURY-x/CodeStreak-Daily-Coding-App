@@ -58,7 +58,21 @@ class MainActivity : ComponentActivity() {
                         }
                         "profile" -> {
                             com.fury.codestreak.presentation.profile.ProfileScreen(
-                                onBack = { currentScreen = "home" }
+                                onBack = { currentScreen = "home" },
+                                onLogout = {
+                                    // 1. Sign out from Firebase
+                                    com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
+
+                                    // 2. Sign out from Google (if used) - Optional but good practice
+                                    val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(
+                                        com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN
+                                    ).build()
+                                    val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(this, gso)
+                                    client.signOut()
+
+                                    // 3. Navigate back to Auth
+                                    currentScreen = "auth"
+                                }
                             )
                         }
                     }
