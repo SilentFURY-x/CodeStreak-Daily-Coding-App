@@ -166,6 +166,7 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.width(16.dp))
 
                     if (isConnected) {
+                        // CONNECTED STATE
                         Column {
                             Text(
                                 text = state.user?.codeforcesHandle ?: "Unknown",
@@ -179,7 +180,16 @@ fun ProfileScreen(
                                 color = TextGray
                             )
                         }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        // THE NEW UNLINK BUTTON
+                        IconButton(onClick = { viewModel.onEvent(ProfileEvent.DisconnectCodeforces) }) {
+                            Icon(Icons.Default.Close, contentDescription = "Unlink", tint = ErrorRed)
+                        }
+
                     } else {
+                        // DISCONNECTED STATE
                         Column {
                             Text("Connect Codeforces", style = MaterialTheme.typography.titleMedium, color = TextWhite)
                             Text("Track your rating & rank", style = MaterialTheme.typography.bodySmall, color = TextGray)

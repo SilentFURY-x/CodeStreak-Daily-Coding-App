@@ -65,7 +65,28 @@ class ProfileViewModel @Inject constructor(
             is ProfileEvent.HideDialog -> _state.value = _state.value.copy(isDialogVisible = false)
             is ProfileEvent.UpdateHandleInput -> _state.value = _state.value.copy(tempHandleInput = event.handle)
             is ProfileEvent.ConnectCodeforces -> connectAndSaveHandle()
+            is ProfileEvent.DisconnectCodeforces -> disconnectHandle()
             is ProfileEvent.Logout -> { /* Handle Logout */ }
+        }
+    }
+
+    private fun disconnectHandle() {
+        viewModelScope.launch {
+            val currentUser = _state.value.user
+            if (currentUser != null) {
+                // Create a copy of the user with NULL handle
+                val updatedUser = currentUser.copy(codeforcesHandle = null)
+
+                // Save to Firestore (Overwrite)
+                userRepository.createOrUpdateUser(updatedUser)
+
+                // Clear UI State immediately
+                _state.value = _state.value.copy(
+                    cfRating = null,
+                    cfRank = null,
+                    cfAvatar = null
+                )
+            }
         }
     }
 
@@ -129,5 +150,6 @@ sealed class ProfileEvent {
     object HideDialog : ProfileEvent()
     data class UpdateHandleInput(val handle: String) : ProfileEvent()
     object ConnectCodeforces : ProfileEvent()
+    object DisconnectCodeforces : ProfileEvent()
     object Logout : ProfileEvent()
 }
