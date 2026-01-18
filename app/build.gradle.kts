@@ -82,7 +82,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
-    // 5. Room (Offline Database - For Brownie Points)
+    // 5. Room (Offline Database)
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
@@ -98,6 +98,9 @@ dependencies {
 
     // 8. System UI Controller (To make the status bar transparent/dark)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
+
+    // 9. WorkManager (Background Tasks & Notifications)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

@@ -41,7 +41,11 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState()) // Make screen scrollable
     ) {
         // 1. Top Bar
-        HomeTopBar(onProfileClick = onNavigateToProfile)
+        HomeTopBar(
+            isNotificationsEnabled = state.isNotificationsEnabled,
+            onNotificationClick = { viewModel.toggleNotifications() },
+            onProfileClick = onNavigateToProfile
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -106,7 +110,11 @@ fun HomeScreen(
 // --- COMPONENTS ---
 
 @Composable
-fun HomeTopBar(onProfileClick: () -> Unit) {
+fun HomeTopBar(
+    isNotificationsEnabled: Boolean,
+    onNotificationClick: () -> Unit,
+    onProfileClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -131,8 +139,13 @@ fun HomeTopBar(onProfileClick: () -> Unit) {
                 color = TextWhite
             )
         }
-        IconButton(onClick = { }) {
-            Icon(Icons.Outlined.Notifications, contentDescription = "Alerts", tint = TextWhite)
+        // TOGGLE BUTTON
+        IconButton(onClick = onNotificationClick) {
+            Icon(
+                imageVector = if (isNotificationsEnabled) Icons.Filled.NotificationsActive else Icons.Outlined.Notifications,
+                contentDescription = "Alerts",
+                tint = if (isNotificationsEnabled) Color(0xFFFFC107) else TextWhite // Gold if active
+            )
         }
     }
 }
