@@ -189,10 +189,8 @@ com.fury.codestreak
 2.  **Add Firebase**
     * Create a project on Firebase Console.
     * Download google-services.json and place it in the app/ directory.
-3.  **Permissions:**
-    * The app requires android.permission.VIBRATE (automatically handled in Manifest).
 
-4.  **Build & Run:**
+3.  **Build & Run:**
     * Open in Android Studio (Koala or newer).
     * Sync Gradle and Run on Emulator/Device.
 
