@@ -21,7 +21,6 @@ class AuthViewModel @Inject constructor(
     private val _state = mutableStateOf(AuthState())
     val state: State<AuthState> = _state
 
-    // 1. Create a Channel for "One-time" UI Events (like Navigation)
     private val _uiEvent = Channel<AuthUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
@@ -85,13 +84,20 @@ class AuthViewModel @Inject constructor(
                 _state.value = _state.value.copy(isLoading = false, error = null)
 
                 result.data?.let { firebaseUser ->
-                    val user = com.fury.codestreak.domain.model.User(
-                        uid = firebaseUser.uid,
-                        email = firebaseUser.email ?: ""
-                    )
-                    userRepository.createOrUpdateUser(user)
+                    // THE FIX: Check if the user already exists in Firestore!
+                    val existingUserCheck = userRepository.getUser(firebaseUser.uid)
+
+                    // Only create a NEW entry if the user was NOT found (Resource.Error)
+                    if (existingUserCheck is Resource.Error) {
+                        val newUser = com.fury.codestreak.domain.model.User(
+                            uid = firebaseUser.uid,
+                            email = firebaseUser.email ?: ""
+                        )
+                        userRepository.createOrUpdateUser(newUser)
+                    }
+                    // If Resource.Success, we do nothing. The existing streak is safe.
                 }
-                // 2. Send the Success Signal!
+
                 _uiEvent.send(AuthUiEvent.NavigateToHome)
             }
             is Resource.Error -> {
@@ -114,7 +120,7 @@ sealed class AuthEvent {
     data class SignInWithGithub(val activity: android.app.Activity) : AuthEvent()
 }
 
-// New: Events sent from ViewModel to UI
+// Events sent from ViewModel to UI
 sealed class AuthUiEvent {
     object NavigateToHome : AuthUiEvent()
 }
