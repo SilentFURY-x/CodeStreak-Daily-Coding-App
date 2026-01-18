@@ -10,7 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,14 +21,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fury.codestreak.presentation.theme.*
+import nl.dionsegijn.konfetti.compose.KonfettiView
+import nl.dionsegijn.konfetti.core.Party
+import nl.dionsegijn.konfetti.core.Position
+import nl.dionsegijn.konfetti.core.emitter.Emitter
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SolutionScreen(
-    viewModel: SolutionViewModel = hiltViewModel(), // Injected VM
+    viewModel: SolutionViewModel = hiltViewModel(),
     onBack: () -> Unit,
     onContinue: () -> Unit
 ) {
+    // 1. Define the Confetti Configuration
+    val party = remember {
+        Party(
+            speed = 0f,
+            maxSpeed = 30f,
+            damping = 0.9f,
+            spread = 360,
+            colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def),
+            emitter = Emitter(duration = 100, TimeUnit.MILLISECONDS).max(100),
+            position = Position.Relative(0.5, 0.3)
+        )
+    }
+
+    // State to trigger confetti
+    var showConfetti by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        showConfetti = true // Trigger animation on entry
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,61 +73,72 @@ fun SolutionScreen(
         },
         containerColor = BackgroundDark
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // 1. Success Banner
-            SuccessBanner()
+        Box(modifier = Modifier.fillMaxSize()) {
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 2. Official Solution Code
-            Text("Official Solution", style = MaterialTheme.typography.titleMedium, color = TextWhite)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // --- CHANGED: Now using the Real Solution from ViewModel ---
-            SolutionCodeBlock(
-                code = viewModel.solutionCode.value
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // 3. Key Takeaways
-            Text("Key Takeaways", style = MaterialTheme.typography.titleMedium, color = TextWhite)
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TakeawayCard(
-                icon = Icons.Default.Speed,
-                title = "Time Complexity: O(n)",
-                description = "By using a Hash Map, we only traverse the list once, making the search significantly faster than nested loops."
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TakeawayCard(
-                icon = Icons.Default.Memory,
-                title = "Space-Time Trade-off",
-                description = "We use extra memory O(n) to store the dictionary to achieve faster execution time."
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 4. Continue Button
-            Button(
-                onClick = onContinue,
+            // 2. Main Content (Scrollable)
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                shape = RoundedCornerShape(12.dp)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Text("Continue Learning", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+                // Success Banner
+                SuccessBanner()
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Official Solution Code
+                Text("Official Solution", style = MaterialTheme.typography.titleMedium, color = TextWhite)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                SolutionCodeBlock(
+                    code = viewModel.solutionCode.value
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Key Takeaways
+                Text("Key Takeaways", style = MaterialTheme.typography.titleMedium, color = TextWhite)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TakeawayCard(
+                    icon = Icons.Default.Speed,
+                    title = "Time Complexity: O(n)",
+                    description = "By using a Hash Map, we only traverse the list once, making the search significantly faster than nested loops."
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TakeawayCard(
+                    icon = Icons.Default.Memory,
+                    title = "Space-Time Trade-off",
+                    description = "We use extra memory O(n) to store the dictionary to achieve faster execution time."
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Continue Button
+                Button(
+                    onClick = onContinue,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Continue Learning", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null)
+                }
+            }
+
+            // 3. The Confetti Overlay (Z-Index is higher by default in Box)
+            if (showConfetti) {
+                KonfettiView(
+                    modifier = Modifier.fillMaxSize(),
+                    parties = listOf(party)
+                )
             }
         }
     }

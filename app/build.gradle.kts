@@ -54,6 +54,9 @@ android {
 
 dependencies {
 
+    // 0. Confetti Animation
+    implementation("nl.dionsegijn:konfetti-compose:2.0.4")
+
     // 1. Core Android & Compose (The UI)
     implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui")
