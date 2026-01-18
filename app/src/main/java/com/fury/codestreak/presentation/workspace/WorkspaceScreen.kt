@@ -1,11 +1,8 @@
 package com.fury.codestreak.presentation.workspace
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,14 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fury.codestreak.presentation.home.Badge
 import com.fury.codestreak.presentation.theme.*
@@ -95,9 +86,11 @@ fun WorkspaceScreen(
             Text("Your Solution", style = MaterialTheme.typography.titleMedium, color = TextWhite)
             Spacer(modifier = Modifier.height(8.dp))
 
+            // THIS NOW USES THE FILE 'CodeEditor.kt' AUTOMATICALLY
             CodeEditor(
-                code = state.code,
-                onValueChange = { viewModel.onCodeChange(it) }
+                value = state.code,
+                onValueChange = { viewModel.onCodeChange(it) },
+                modifier = Modifier.height(300.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -128,7 +121,7 @@ fun WorkspaceScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 5. Hint Card (Static for now)
+            // 5. Hint Card
             Card(
                 colors = CardDefaults.cardColors(containerColor = SurfaceDark.copy(alpha = 0.5f)),
                 shape = RoundedCornerShape(12.dp),
@@ -147,58 +140,6 @@ fun WorkspaceScreen(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun CodeEditor(code: String, onValueChange: (String) -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp) // Fixed height for editor
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF0D1117)) // Darker editor background
-            .border(1.dp, SurfaceHighlight, RoundedCornerShape(12.dp))
-    ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            // Line Numbers Column
-            Column(
-                modifier = Modifier
-                    .width(40.dp)
-                    .fillMaxHeight()
-                    .background(SurfaceDark)
-                    .padding(vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val lineCount = code.lines().size
-                repeat(lineCount.coerceAtLeast(10)) { index ->
-                    Text(
-                        text = "${index + 1}",
-                        style = TextStyle(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 14.sp,
-                            color = TextGray.copy(alpha = 0.5f)
-                        )
-                    )
-                }
-            }
-
-            // Text Input Area
-            BasicTextField(
-                value = code,
-                onValueChange = onValueChange,
-                textStyle = TextStyle(
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp,
-                    color = TextWhite,
-                    lineHeight = 20.sp // Match line height with line numbers
-                ),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                cursorBrush = SolidColor(PrimaryBlue)
-            )
         }
     }
 }
