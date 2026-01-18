@@ -105,11 +105,11 @@ fun WorkspaceScreen(
             // 4. Submit Button
             Button(
                 onClick = {
-                    val isValid = viewModel.onSubmit()
-                    if (isValid) {
-                        onSubmitSuccess() // Navigate ONLY if valid
+                    if (state.isSubmitted) {
+                        onSubmitSuccess() // If solved, just go to solution
                     } else {
-                        // Optional: Show a Snackbar or Toast here saying "Please attempt the problem!"
+                        val isValid = viewModel.onSubmit() // If new, try submitting
+                        if (isValid) onSubmitSuccess()
                     }
                 },
                 modifier = Modifier
@@ -118,13 +118,12 @@ fun WorkspaceScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text(
-                    text = "Submit to Reveal Solution",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontSize = 16.sp
+                Icon(
+                    if (state.isSubmitted) Icons.Default.Visibility else Icons.Default.Send,
+                    contentDescription = null
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Default.Send, contentDescription = null, modifier = Modifier.size(16.dp))
+                Text(if (state.isSubmitted) "View Solution" else "Submit to Reveal Solution")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
