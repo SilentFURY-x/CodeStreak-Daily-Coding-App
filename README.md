@@ -67,9 +67,13 @@ Unlike massive platforms that overwhelm you with thousands of choices, CodeStrea
 
 <div align="center">
 
-| **Home Dashboard** | **The Workspace** | **Profile & Heatmap** | **Dark Mode Editor** |
-|:---:|:---:|:---:|:---:|
-| <img src="screenshots/home.png" width="240" /> | <img src="screenshots/workspace.png" width="240" /> | <img src="screenshots/profile.png" width="240" /> | <img src="screenshots/editor.png" width="240" /> |
+| **Home Dashboard** | **The Workspace** | **Profile & Heatmap** |
+|:---:|:---:|:---:|
+| <img src="screenshots/home.jpg" width="240" /> | <img src="screenshots/workspace.jpg" width="240" /> | <img src="screenshots/profile.jpg" width="240" /> |
+
+| **Solution Screen** | **Daily Notification** | **Saved Questions Screen** |
+|:---:|:---:|:---:|
+|  <img src="screenshots/solution.jpg" width="240" /> | <img src="screenshots/notif.jpg" width="240" /> | <img src="screenshots/saved.jpg" width="240" /> |
 
 </div>
 
