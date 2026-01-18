@@ -141,31 +141,44 @@ fun HomeTopBar(onProfileClick: () -> Unit) {
 fun StreakCard(streak: Int) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(24.dp), // More rounded
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
         border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceHighlight)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Gradient Fire Icon Background
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color(0xFFFF5722), Color(0xFFFF8A65))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Text("CURRENT STREAK", style = MaterialTheme.typography.labelSmall, color = TextGray)
-                Icon(Icons.Default.LocalFireDepartment, contentDescription = null, tint = Color(0xFFFF5722))
+                Icon(
+                    imageVector = Icons.Default.LocalFireDepartment,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(32.dp)
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.Bottom) {
-                Text("$streak Days", style = MaterialTheme.typography.headlineMedium, color = TextWhite)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("+1 today", color = SuccessGreen, fontWeight = FontWeight.Bold)
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column {
+                Text("Current Streak", style = MaterialTheme.typography.labelMedium, color = TextGray)
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text("$streak", style = MaterialTheme.typography.headlineLarge, color = TextWhite, fontWeight = FontWeight.Bold)
+                    Text(" Days", style = MaterialTheme.typography.titleMedium, color = TextGray, modifier = Modifier.padding(bottom = 4.dp))
+                }
+                Text("Keep it up! +1 today", style = MaterialTheme.typography.bodySmall, color = SuccessGreen, fontWeight = FontWeight.Bold)
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            LinearProgressIndicator(
-                progress = { 0.7f },
-                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp)),
-                color = PrimaryBlue,
-                trackColor = SurfaceHighlight,
-            )
         }
     }
 }
@@ -199,13 +212,7 @@ fun WeeklyProgressBar(progress: List<Boolean>) {
 }
 
 @Composable
-fun DailyChallengeCard(
-    title: String,
-    difficulty: String,
-    time: String,
-    description: String,
-    onClick: () -> Unit
-) {
+fun DailyChallengeCard(title: String, difficulty: String, time: String, description: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -213,18 +220,11 @@ fun DailyChallengeCard(
         border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceHighlight)
     ) {
         Column {
-            // Gradient Background for the "Code Image" area
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color(0xFF1E293B), Color(0xFF0F172A))
-                        )
-                    )
+                modifier = Modifier.fillMaxWidth().height(120.dp).background(
+                    Brush.verticalGradient(colors = listOf(Color(0xFF1E293B), Color(0xFF0F172A)))
+                )
             ) {
-                // Overlay a faint code pattern or just badges
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row {
                         Badge(text = difficulty, color = SuccessGreen)
@@ -233,20 +233,12 @@ fun DailyChallengeCard(
                     }
                 }
             }
-
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(title, style = MaterialTheme.typography.titleLarge, color = TextWhite)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(description, style = MaterialTheme.typography.bodyMedium, color = TextGray, maxLines = 3)
-
                 Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = onClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
+                Button(onClick = onClick, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue), shape = RoundedCornerShape(8.dp)) {
                     Icon(Icons.Default.Code, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Start Coding")
@@ -264,14 +256,8 @@ fun RecommendedCard(icon: ImageVector, title: String, subtitle: String, color: C
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
         border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceHighlight)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Box(
-                modifier = Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+            Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(color.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
                 Icon(icon, null, tint = color, modifier = Modifier.size(20.dp))
             }
             Column {
@@ -284,11 +270,7 @@ fun RecommendedCard(icon: ImageVector, title: String, subtitle: String, color: C
 
 @Composable
 fun Badge(text: String, color: Color) {
-    Box(
-        modifier = Modifier
-            .background(color.copy(alpha = 0.1f), RoundedCornerShape(4.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
+    Box(modifier = Modifier.background(color.copy(alpha = 0.1f), RoundedCornerShape(4.dp)).padding(horizontal = 8.dp, vertical = 4.dp)) {
         Text(text, style = MaterialTheme.typography.labelSmall, color = color, fontWeight = FontWeight.Bold)
     }
 }
