@@ -58,10 +58,7 @@ class MainActivity : ComponentActivity() {
                         }
                         "profile" -> {
                             com.fury.codestreak.presentation.profile.ProfileScreen(
-                                onLogout = {
-                                    // In a real app, call authRepository.logout() here first
-                                    currentScreen = "auth"
-                                }
+                                onBack = { currentScreen = "home" }
                             )
                         }
                     }

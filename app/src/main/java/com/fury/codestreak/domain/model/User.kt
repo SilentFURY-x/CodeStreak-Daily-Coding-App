@@ -7,5 +7,6 @@ data class User(
     val lastSolvedDate: Long = 0L, // Timestamp of last submission
     val solvedQuestionIds: List<String> = emptyList(), // ["q1", "q5"]
     val totalSolved: Int = 0,
-    val score: Int = 0 // XP points
+    val score: Int = 0, // XP points
+    val codeforcesHandle: String? = null
 )
