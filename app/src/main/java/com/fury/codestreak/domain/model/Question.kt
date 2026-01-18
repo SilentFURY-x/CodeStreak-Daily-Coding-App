@@ -10,5 +10,6 @@ data class Question(
     val isSolved: Boolean = false,
     val date: Long = 0L, // We will use this to lock/unlock daily questions
     val starterCode: String = "// Write your solution here...",
-    val solutionCode: String = "// Solution not available yet"
+    val solutionCode: String = "// Solution not available yet",
+    val userCode: String? = null
 )

@@ -16,7 +16,8 @@ data class QuestionEntity(
     val date: Long,
     // NEW FIELDS
     val starterCode: String,
-    val solutionCode: String
+    val solutionCode: String,
+    val userCode: String? = null
 ) {
     fun toDomain(): Question {
         return Question(
@@ -29,7 +30,8 @@ data class QuestionEntity(
             isSolved = isSolved,
             date = date,
             starterCode = starterCode,
-            solutionCode = solutionCode
+            solutionCode = solutionCode,
+            userCode = userCode
         )
     }
 }
@@ -45,6 +47,7 @@ fun Question.toEntity(): QuestionEntity {
         isSolved = isSolved,
         date = date,
         starterCode = starterCode,
-        solutionCode = solutionCode
+        solutionCode = solutionCode,
+        userCode = userCode
     )
 }

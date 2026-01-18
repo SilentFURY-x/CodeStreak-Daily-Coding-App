@@ -27,6 +27,10 @@ class QuestionRepositoryImpl @Inject constructor(
                 val dailyIndex = (dayOfYear % allDocs.size).toInt()
                 val targetDoc = allDocs[dailyIndex]
 
+                // 3. CHECK LOCAL FIRST (The Fix!)
+                // Before we overwrite, check if we already have this question saved locally
+                val existingLocalQuestion = dao.getQuestionById(targetDoc.id)
+
                 val entity = QuestionEntity(
                     id = targetDoc.id,
                     title = targetDoc.getString("title") ?: "Unknown Challenge",
@@ -35,13 +39,16 @@ class QuestionRepositoryImpl @Inject constructor(
                     topic = targetDoc.getString("topic") ?: "General",
                     timeEstimate = targetDoc.getString("timeEstimate") ?: "15 mins",
                     date = System.currentTimeMillis(),
-                    isSolved = false,
-                    // --- NEW FIELDS ADDED HERE ---
+                    // PRESERVE PROGRESS: Use local status if available, else default to false
+                    isSolved = existingLocalQuestion?.isSolved ?: false,
+                    // NEW FIELDS
                     starterCode = targetDoc.getString("starterCode") ?: "// Write your solution here...",
-                    solutionCode = targetDoc.getString("solutionCode") ?: "// Solution not available yet"
+                    solutionCode = targetDoc.getString("solutionCode") ?: "// Solution not available yet",
+                    // PRESERVE USER CODE: Keep what they typed!
+                    userCode = existingLocalQuestion?.userCode
                 )
 
-                // 3. Cache it locally
+                // 4. Update Cache (Safe Insert)
                 dao.insertQuestions(listOf(entity))
                 Resource.Success(entity.toDomain())
             } else {
@@ -64,10 +71,13 @@ class QuestionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun markQuestionSolved(id: String) {
+    override suspend fun markQuestionSolved(id: String, userCode: String) {
         val question = dao.getQuestionById(id)
         question?.let {
-            dao.updateQuestion(it.copy(isSolved = true))
+            dao.updateQuestion(it.copy(
+                isSolved = true,
+                userCode = userCode // <--- Save the user's work!
+            ))
         }
     }
 
@@ -82,9 +92,9 @@ class QuestionRepositoryImpl @Inject constructor(
                 timeEstimate = "15 mins",
                 date = System.currentTimeMillis(),
                 isSolved = false,
-                // --- NEW DUMMY DATA ADDED HERE ---
                 starterCode = "fun isPalindrome(s: String): Boolean {\n    // Your code here\n}",
-                solutionCode = "fun isPalindrome(s: String): Boolean {\n    return s == s.reversed()\n}"
+                solutionCode = "fun isPalindrome(s: String): Boolean {\n    return s == s.reversed()\n}",
+                userCode = null
             )
         )
         dao.insertQuestions(dummyQuestions)

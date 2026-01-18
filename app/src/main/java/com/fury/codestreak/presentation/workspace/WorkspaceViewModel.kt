@@ -28,18 +28,23 @@ class WorkspaceViewModel @Inject constructor(
 
     private fun loadQuestion() {
         viewModelScope.launch {
-            // Get the same daily question
             when(val result = repository.getDailyQuestion()) {
                 is Resource.Success -> {
                     result.data?.let { question ->
+                        val isAlreadySolved = question.isSolved
+
+                        // LOGIC: If they have saved code, show it. Otherwise show starter code.
+                        val displayCode = question.userCode ?: question.starterCode
+
                         _state.value = _state.value.copy(
                             question = question,
-                            // LOAD THE REAL STARTER CODE
-                            code = question.starterCode
+                            code = if (isAlreadySolved) displayCode else question.starterCode,
+                            isSubmitted = isAlreadySolved,
+                            showSolution = isAlreadySolved
                         )
                     }
                 }
-                else -> {} // Handle error
+                else -> {}
             }
         }
     }
@@ -58,11 +63,11 @@ class WorkspaceViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            // 1. Mark local DB
             _state.value.question?.let { question ->
-                repository.markQuestionSolved(question.id)
+                // 1. Mark Solved AND Save User Code
+                repository.markQuestionSolved(question.id, currentCode)
 
-                // 2. Mark Firestore User (The Real Memory)
+                // 2. Increment Streak
                 val user = authRepository.getCurrentUser()
                 if (user != null) {
                     userRepository.incrementStreak(user.uid, question.id)
