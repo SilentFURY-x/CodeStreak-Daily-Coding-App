@@ -1,6 +1,7 @@
 package com.fury.codestreak.presentation.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.fury.codestreak.presentation.components.ShimmerCard
 import com.fury.codestreak.presentation.theme.*
 
 @Composable
@@ -74,8 +76,38 @@ fun HomeScreen(
                 onClick = onNavigateToWorkspace
             )
         } ?: run {
-            // Loading State Placeholder
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp).background(SurfaceDark, RoundedCornerShape(16.dp)))
+            // --- FANCY SHIMMER SKELETON ---
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceDark, RoundedCornerShape(16.dp))
+                    .border(1.dp, SurfaceHighlight, RoundedCornerShape(16.dp))
+                    .padding(16.dp)
+            ) {
+                // Header (Title)
+                ShimmerCard(height = 24.dp, width = 200.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Badges
+                Row {
+                    ShimmerCard(height = 20.dp, width = 60.dp)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    ShimmerCard(height = 20.dp, width = 80.dp)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Description Lines
+                ShimmerCard(height = 14.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+                ShimmerCard(height = 14.dp)
+                Spacer(modifier = Modifier.height(8.dp))
+                ShimmerCard(height = 14.dp, width = 150.dp)
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Button
+                ShimmerCard(height = 48.dp)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
