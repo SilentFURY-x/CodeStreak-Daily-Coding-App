@@ -33,9 +33,7 @@ class MainActivity : ComponentActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Permission granted.
-        }
+        // Permission logic
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,18 +50,46 @@ class MainActivity : ComponentActivity() {
 
                     var currentScreen by remember { mutableStateOf(startDestination) }
 
-                    // --- ANIMATION BLOCK STARTS HERE ---
+                    // 1. Helper to define Screen Depth (For animation direction)
+                    fun getScreenLevel(screen: String): Int {
+                        return when (screen) {
+                            "auth" -> 0
+                            "home" -> 1
+                            "workspace", "profile", "bookmarks" -> 2
+                            "solution" -> 3
+                            else -> 1
+                        }
+                    }
+
+                    // 2. The Smart Animation Block
                     AnimatedContent(
                         targetState = currentScreen,
                         label = "Screen Transition",
                         transitionSpec = {
-                            // Slide in from Right, Slide out to Left
-                            (slideInHorizontally(initialOffsetX = { it }) + fadeIn(animationSpec = tween(300)))
-                                .togetherWith(slideOutHorizontally(targetOffsetX = { -it }) + fadeOut(animationSpec = tween(300)))
+                            val initialLevel = getScreenLevel(initialState)
+                            val targetLevel = getScreenLevel(targetState)
+
+                            if (targetLevel > initialLevel) {
+                                // Going Deeper (Forward): Slide In from Right, Push Out to Left
+                                (slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(400)) +
+                                        fadeIn(animationSpec = tween(400)))
+                                    .togetherWith(
+                                        slideOutHorizontally(targetOffsetX = { -it / 3 }, animationSpec = tween(400)) +
+                                                fadeOut(animationSpec = tween(400))
+                                    )
+                            } else {
+                                // Going Back: Slide In from Left, Push Out to Right
+                                (slideInHorizontally(initialOffsetX = { -it }, animationSpec = tween(400)) +
+                                        fadeIn(animationSpec = tween(400)))
+                                    .togetherWith(
+                                        slideOutHorizontally(targetOffsetX = { it / 3 }, animationSpec = tween(400)) +
+                                                fadeOut(animationSpec = tween(400))
+                                    )
+                            }
                         }
                     ) { targetScreen ->
 
-                        // Note: We use 'targetScreen' here, not 'currentScreen'
+                        // 3. Screen Navigation Logic
                         when (targetScreen) {
                             "auth" -> {
                                 com.fury.codestreak.presentation.auth.AuthScreen(
@@ -92,16 +118,14 @@ class MainActivity : ComponentActivity() {
                                 com.fury.codestreak.presentation.profile.ProfileScreen(
                                     onBack = { currentScreen = "home" },
                                     onLogout = {
-                                        // 1. Sign out Firebase
                                         com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
-
-                                        // 2. Sign out Google
                                         val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(
                                             com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN
                                         ).build()
                                         val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(this@MainActivity, gso)
                                         client.signOut()
 
+                                        // Clear ViewModels on Logout
                                         viewModelStore.clear()
 
                                         currentScreen = "auth"
@@ -119,7 +143,6 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-                    // --- ANIMATION BLOCK ENDS HERE ---
                 }
             }
         }

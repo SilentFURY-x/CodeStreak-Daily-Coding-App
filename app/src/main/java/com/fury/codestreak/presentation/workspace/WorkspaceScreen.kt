@@ -1,5 +1,8 @@
 package com.fury.codestreak.presentation.workspace
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.fury.codestreak.presentation.home.Badge
 import com.fury.codestreak.presentation.theme.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +30,16 @@ fun WorkspaceScreen(
 ) {
     val state = viewModel.state.value
     val question = state.question ?: return
+
+    // --- DELAY HEAVY RENDERING ---
+    // We wait 400ms (animation duration) before rendering the heavy CodeEditor.
+    // This ensures the slide animation never stutters.
+    var isTransitionFinished by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(450) // Wait slightly longer than the 400ms transition
+        isTransitionFinished = true
+    }
 
     Scaffold(
         topBar = {
@@ -59,7 +73,7 @@ fun WorkspaceScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // 1. Header Info
+            // 1. Header Info (Lightweight - Renders immediately)
             Text(question.title, style = MaterialTheme.typography.headlineSmall, color = TextWhite)
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -82,16 +96,37 @@ fun WorkspaceScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Code Editor Area
+            // 3. Code Editor Area (HEAVY)
             Text("Your Solution", style = MaterialTheme.typography.titleMedium, color = TextWhite)
             Spacer(modifier = Modifier.height(8.dp))
 
-            // THIS NOW USES THE FILE 'CodeEditor.kt' AUTOMATICALLY
-            CodeEditor(
-                value = state.code,
-                onValueChange = { viewModel.onCodeChange(it) },
-                modifier = Modifier.height(300.dp)
-            )
+            // Only render the heavy editor AFTER the animation is done
+            if (isTransitionFinished) {
+                // Fade it in smoothly so it doesn't just "pop"
+                AnimatedVisibility(
+                    visible = true,
+                    enter = fadeIn(animationSpec = tween(300))
+                ) {
+                    CodeEditor(
+                        value = state.code,
+                        onValueChange = { viewModel.onCodeChange(it) },
+                        modifier = Modifier.height(300.dp)
+                    )
+                }
+            } else {
+                // Placeholder while sliding (Prevents lag)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(300.dp)
+                        .padding(2.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = PrimaryBlue
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -99,9 +134,9 @@ fun WorkspaceScreen(
             Button(
                 onClick = {
                     if (state.isSubmitted) {
-                        onSubmitSuccess() // If solved, just go to solution
+                        onSubmitSuccess()
                     } else {
-                        val isValid = viewModel.onSubmit() // If new, try submitting
+                        val isValid = viewModel.onSubmit()
                         if (isValid) onSubmitSuccess()
                     }
                 },
