@@ -72,6 +72,19 @@ class MainActivity : ComponentActivity() {
 
                                     // 3. Navigate back to Auth
                                     currentScreen = "auth"
+                                },
+                                onNavigateToBookmarks = { currentScreen = "bookmarks" } // <--- Handle navigation
+                            )
+                        }
+
+                        "bookmarks" -> {
+                            com.fury.codestreak.presentation.bookmarks.BookmarksScreen(
+                                onBack = { currentScreen = "profile" },
+                                onQuestionClick = { questionId ->
+                                    // For MVP: We will just go to workspace.
+                                    // NOTE: In the next polish step, we will make Workspace load specific IDs.
+                                    // For now, let's just open the daily workspace as a placeholder.
+                                    currentScreen = "workspace"
                                 }
                             )
                         }

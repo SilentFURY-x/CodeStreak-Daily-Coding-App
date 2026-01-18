@@ -52,6 +52,8 @@ fun SolutionScreen(
 
     LaunchedEffect(Unit) {
         showConfetti = true // Trigger animation on entry
+        // Force a data refresh every time the screen is shown
+        viewModel.refreshData()
     }
 
     Scaffold(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -28,7 +29,8 @@ import com.fury.codestreak.presentation.theme.*
 fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onBack: () -> Unit,
-    onLogout: () -> Unit // <--- Added Logout Callback
+    onLogout: () -> Unit, // <--- Added Logout Callback
+    onNavigateToBookmarks: () -> Unit
 ) {
     val state = viewModel.state.value
 
@@ -197,6 +199,42 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.weight(1f))
                         Icon(Icons.Default.Add, contentDescription = null, tint = PrimaryBlue)
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 5. Saved Questions
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToBookmarks() }, // <--- You need to add this callback to params
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceHighlight)
+            ) {
+                Row(
+                    modifier = Modifier.padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(PrimaryBlue.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Bookmark, contentDescription = null, tint = PrimaryBlue)
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    Column {
+                        Text("Saved Questions", style = MaterialTheme.typography.titleMedium, color = TextWhite)
+                        Text("Review your tricky problems", style = MaterialTheme.typography.bodySmall, color = TextGray)
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = TextGray)
                 }
             }
         }

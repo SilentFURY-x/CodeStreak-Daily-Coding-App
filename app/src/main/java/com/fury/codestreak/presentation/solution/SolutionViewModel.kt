@@ -20,13 +20,18 @@ class SolutionViewModel @Inject constructor(
     val isBookmarked = mutableStateOf(false) // <--- Track UI State
 
     init {
+        refreshData() // Load immediately on init
+    }
+
+    // Public function to refresh state from DB
+    fun refreshData() {
         viewModelScope.launch {
             val result = repository.getDailyQuestion()
             if (result is Resource.Success) {
                 val question = result.data
                 currentQuestion.value = question
                 solutionCode.value = question?.solutionCode ?: "No solution found."
-                // Initialize UI State
+                // This ensures we get the latest bookmark status from the DB
                 isBookmarked.value = question?.isBookmarked ?: false
             }
         }
