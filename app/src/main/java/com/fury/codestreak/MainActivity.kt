@@ -102,6 +102,8 @@ class MainActivity : ComponentActivity() {
                                         val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(this@MainActivity, gso)
                                         client.signOut()
 
+                                        viewModelStore.clear()
+
                                         currentScreen = "auth"
                                     },
                                     onNavigateToBookmarks = { currentScreen = "bookmarks" }
